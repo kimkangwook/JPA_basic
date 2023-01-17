@@ -1,33 +1,29 @@
 package hellojpa;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import javax.persistence.*;
+import javax.transaction.Transactional;
 
 public class JpaMain {
     public static void main(String[] args) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
-
-        EntityManager em = emf.createEntityManager();
-
-        EntityTransaction tx = em.getTransaction();
+        MultiThread mtt = new MultiThread();
+        String[] str={"김강욱","정원찬","김재원","장태원","임재현"};
+        EntityTransaction tx = mtt.em.getTransaction();
         tx.begin();
-
-        try{
-            Member findMember = em.find(Member.class, 1L);
-            findMember.setName("HelloJPA");
-            System.out.println("findMember.id = " + findMember.getId());
-            System.out.println("findMember.name = " + findMember.getName());
-
+        try {
+            for(int i=0;i<5;i++) {
+                Member member = new Member();
+                member.setId(i + 1L);
+                member.setName(str[i]);
+                mtt.setMember(member);
+                mtt.start();
+                System.out.println("mlt.em.getClass() = " +  mtt.em.getClass());
+                Member findMember = mtt.em.find(Member.class, member.getId());
+                System.out.println("findMember = " + findMember.getName());
+            }
             tx.commit();
-
-        }catch (Exception e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             tx.rollback();
-        } finally {
-            em.close();
         }
-
-        emf.close();
     }
 }
